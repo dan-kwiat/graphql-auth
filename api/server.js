@@ -7,20 +7,18 @@ const { attachUserToContext } = require('./middleware');
 const { getArticlesForAuthor, addArticle } = require('./controllers');
 const { checkAuthAndResolve, checkScopesAndResolve } = require('./resolvers');
 
-const app = express();
+const port = 4000
 
-let ARTICLES = require('./data/articles');
+const app = express()
 
-const port = 8080;
 const typeDefs = `
-
   directive @isAuthenticated on QUERY | FIELD
   directive @hasScope(scope: [String]) on QUERY | FIELD
 
   type Article {
     id: ID!
     authorId: ID!
-    authorName: String!
+    authorName: String! @hasScope(scope: ["read:author"])
     articleName: String!
     link: String!
     review: Review
