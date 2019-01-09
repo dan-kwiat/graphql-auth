@@ -41,6 +41,7 @@ const directiveResolvers = {
       if (expectedScopes.some(scope => scopes.indexOf(scope) !== -1)) {
         return result;
       }
+      throw new Error();
     } catch (err) {
       return Promise.reject(
         new AuthorizationError({
