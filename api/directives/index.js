@@ -2,6 +2,7 @@ const { forEachField } = require('graphql-tools');
 const { getArgumentValues } = require('graphql/execution/values');
 const { AuthorizationError } = require('./../errors');
 const jwt = require('jsonwebtoken');
+const { defaultFieldResolver } = require('graphql');
 
 const directiveResolvers = {
   isAuthenticated(result, source, args, context) {
@@ -61,7 +62,7 @@ const attachDirectives = schema => {
       const resolver = directiveResolvers[directiveName];
 
       if (resolver) {
-        const oldResolve = field.resolve;
+        const oldResolve = field.resolve || defaultFieldResolver;
         const Directive = schema.getDirective(directiveName);
         const args = getArgumentValues(Directive, directive);
 
