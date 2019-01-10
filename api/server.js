@@ -18,10 +18,10 @@ const typeDefs = `
   type Article {
     id: ID!
     authorId: ID!
-    authorName: String! @hasScope(scope: ["read:author"])
+    authorName: String!
     articleName: String!
     link: String!
-    review: Review
+    review: Review @hasScope(scope: ["read:review"])
   }
   
   type Review {
