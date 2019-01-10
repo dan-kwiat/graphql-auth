@@ -1,5 +1,14 @@
 # GraphQL Auth
 
+This repository contains:
+
+* A Node + Express + GraphQL API serving data from a JSON file.  Authentication and authorisation is performed using directives on certain queries and fields.
+* A React web app serving a customised GraphiQL interface for interacting with the API.  The toolbar allows you to set the scopes of the JSON Web Token (sent to the API in the authorization header).
+
+## Demo
+
+[https://graphql-auth.now.sh](https://graphql-auth.now.sh)
+
 ## Installation
 
 Install the web app:
