@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "GraphQL Auth",
+  "name": "GraphQL authorization using scopes and directives",
   "icons": [
     {
       "src": "favicon.ico",
