@@ -1,60 +1,82 @@
-import React from 'react';
-import GraphiQL from 'graphiql';
-// import fetch from 'fetch';
-// import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react'
+import { parse, print } from 'graphql';
+import GraphiQL from 'graphiql'
+import './App.css'
 import 'graphiql/graphiql.css'
-// class App extends Component {
-//   render() {
-//     return (
-//       <div className="App">
-//         <header className="App-header">
-//           <img src={logo} className="App-logo" alt="logo" />
-//           <p>
-//             Edit <code>src/App.js</code> and save to reload.
-//           </p>
-//           <a
-//             className="App-link"
-//             href="https://reactjs.org"
-//             target="_blank"
-//             rel="noopener noreferrer"
-//           >
-//             Learn React
-//           </a>
-//         </header>
-//       </div>
-//     );
-//   }
-// }
+import { getAccessToken, defaultQuery } from './lib'
 
-// without scopes
-// const jwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJncmFwaHFsLXRlc3Qtc2VydmVyIiwiaWF0IjoxNTA5MDQxMTE3LCJleHAiOjI1NDA1NzcxMTcsImF1ZCI6ImdyYXBocWwtdGVzdC1hcGkiLCJzdWIiOiIxMjMifQ.MoFMdDGC9KEUKSTa7FLthshgnhxWlLqigGrWPx1Kt5k'
-
-// with read:author
-// const jwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJncmFwaHFsLXRlc3Qtc2VydmVyIiwiaWF0IjoxNTA5MDQxMTE3LCJleHAiOjI1NDA1NzcxMTcsImF1ZCI6ImdyYXBocWwtdGVzdC1hcGkiLCJzdWIiOiIxMjMiLCJzY29wZSI6InJlYWQ6YXV0aG9yIn0.5lqn5-0yfyFxeYQC_1okF6Qk8M1ghYkW73hgMbnFT6g'
-
-// with read:authorz
-const jwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJncmFwaHFsLXRlc3Qtc2VydmVyIiwiaWF0IjoxNTA5MDQxMTE3LCJleHAiOjI1NDA1NzcxMTcsImF1ZCI6ImdyYXBocWwtdGVzdC1hcGkiLCJzdWIiOiIxMjMiLCJzY29wZSI6InJlYWQ6YXV0aG9yeiJ9.pnsky7nI_Na3aUpaV4P_GrhnI7vjhDelWIrGYU27fAc'
-
-// with write:articles
-// const jwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJncmFwaHFsLXRlc3Qtc2VydmVyIiwiaWF0IjoxNTA5MDQxMTE3LCJleHAiOjI1NDA1NzcxMTcsImF1ZCI6ImdyYXBocWwtdGVzdC1hcGkiLCJzdWIiOiIxMjMiLCJzY29wZSI6IndyaXRlOmFydGljbGVzIn0.FWk4Ht6HFl4nhPSlHFUebC7Nh0JCSV12aeZjFjGcAsI'
-
-// with read:author write:articles
-// const jwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJncmFwaHFsLXRlc3Qtc2VydmVyIiwiaWF0IjoxNTA5MDQxMTE3LCJleHAiOjI1NDA1NzcxMTcsImF1ZCI6ImdyYXBocWwtdGVzdC1hcGkiLCJzdWIiOiIxMjMiLCJzY29wZSI6InJlYWQ6YXV0aG9yIHdyaXRlOmFydGljbGVzIn0.V8ogQuj5_FBBdJByl1DBAFXAU4-Noa81gwZCltU1yBE'
-
-function graphQLFetcher(graphQLParams) {
+const getGraphQLFetcher = (authorId, scope) => graphQLParams => {
   return fetch('/graphql', {
     method: 'post',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${jwt}`,
+      'Authorization': `Bearer ${getAccessToken(authorId, scope)}`,
     },
     body: JSON.stringify(graphQLParams),
-  }).then(response => response.json());
+  }).then(response => response.json())
 }
 
-const App = () => <div id="graphiql">
-  <GraphiQL fetcher={graphQLFetcher} />
-</div>
+class App extends Component {
+  state = {
+    scope: 'read:review',
+    authors: [
+      { id: '123' },
+      { id: '234' },
+      { id: '345' },
+      { id: '456' },
+    ],
+    authorId: '123',
+  }
+  handlePrettifyQuery = event => {
+    const editor = this.graphiqlComp.getQueryEditor()
+    editor.setValue(print(parse(editor.getValue())))
+  }
+  handleToggleHistory = () => {
+    this.graphiqlComp.setState(s => ({
+      historyPaneOpen: !s.historyPaneOpen
+    }))
+  }
+  render() {
+    return (
+      <div id='graphiql-container'>
+        <GraphiQL
+          ref={c => { this.graphiqlComp = c }}
+          fetcher={getGraphQLFetcher(this.state.authorId, this.state.scope)}
+          defaultQuery={defaultQuery}
+          >
+          <GraphiQL.Toolbar>
+            <GraphiQL.Button
+              onClick={this.handlePrettifyQuery}
+              title='Prettify Query (Shift-Ctrl-P)'
+              label='Prettify'
+            />
+            <GraphiQL.Button
+              onClick={this.handleToggleHistory}
+              title='Show History'
+              label='History'
+            />
+            <GraphiQL.Select
+              title='AuthorId'
+            >
+              {this.state.authors.map(({ id }) => (
+                <GraphiQL.SelectOption
+                  key={id}
+                  label={`Author: ${id}`}
+                  selected={id === this.state.authorId}
+                  onSelect={() => this.setState({ authorId: id })}
+                />
+              ))}
+            </GraphiQL.Select>
+            <input
+              placeholder='scope'
+              value={this.state.scope}
+              onChange={e => this.setState({ scope: e.target.value })}
+            />
+          </GraphiQL.Toolbar>
+        </GraphiQL>
+      </div>
+    )
+  }
+}
 
-export default App;
+export default App
