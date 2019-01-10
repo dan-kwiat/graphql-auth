@@ -11,6 +11,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-#graphiql-container {
+#graphiql-auth-container {
   height: 100vh;
 }

@@ -38,7 +38,7 @@ class App extends Component {
   }
   render() {
     return (
-      <div id='graphiql-container'>
+      <div id='graphiql-auth-container'>
         <GraphiQL
           ref={c => { this.graphiqlComp = c }}
           fetcher={getGraphQLFetcher(this.state.userId, this.state.scope)}
