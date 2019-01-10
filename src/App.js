@@ -5,12 +5,12 @@ import './App.css'
 import 'graphiql/graphiql.css'
 import { getAccessToken, defaultQuery } from './lib'
 
-const getGraphQLFetcher = (authorId, scope) => graphQLParams => {
+const getGraphQLFetcher = (userId, scope) => graphQLParams => {
   return fetch('/graphql', {
     method: 'post',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${getAccessToken(authorId, scope)}`,
+      'Authorization': `Bearer ${getAccessToken(userId, scope)}`,
     },
     body: JSON.stringify(graphQLParams),
   }).then(response => response.json())
@@ -19,13 +19,13 @@ const getGraphQLFetcher = (authorId, scope) => graphQLParams => {
 class App extends Component {
   state = {
     scope: 'read:review',
-    authors: [
+    users: [
       { id: '123' },
       { id: '234' },
       { id: '345' },
       { id: '456' },
     ],
-    authorId: '123',
+    userId: '123',
   }
   handlePrettifyQuery = event => {
     const editor = this.graphiqlComp.getQueryEditor()
@@ -41,7 +41,7 @@ class App extends Component {
       <div id='graphiql-container'>
         <GraphiQL
           ref={c => { this.graphiqlComp = c }}
-          fetcher={getGraphQLFetcher(this.state.authorId, this.state.scope)}
+          fetcher={getGraphQLFetcher(this.state.userId, this.state.scope)}
           defaultQuery={defaultQuery}
           >
           <GraphiQL.Toolbar>
@@ -56,14 +56,14 @@ class App extends Component {
               label='History'
             />
             <GraphiQL.Select
-              title='AuthorId'
+              title='UserId'
             >
-              {this.state.authors.map(({ id }) => (
+              {this.state.users.map(({ id }) => (
                 <GraphiQL.SelectOption
                   key={id}
-                  label={`Author: ${id}`}
-                  selected={id === this.state.authorId}
-                  onSelect={() => this.setState({ authorId: id })}
+                  label={`User: ${id}`}
+                  selected={id === this.state.userId}
+                  onSelect={() => this.setState({ userId: id })}
                 />
               ))}
             </GraphiQL.Select>
