@@ -1,6 +1,6 @@
 import jwt from 'jwt-simple'
 
-// these should match values in api/.env
+// these should match the values in api/config.json
 const JWT_AUDIENCE = 'graphql-test-api'
 const JWT_ISSUER = 'graphql-test-server'
 const JWT_SECRET = 'some-strong-secret-key'

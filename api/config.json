@@ -1,0 +1,7 @@
+{
+  "jwt": {
+    "audience": "graphql-test-api",
+    "issuer": "graphql-test-server",
+    "secret": "some-strong-secret-key"
+  }
+}

@@ -1,15 +1,17 @@
-require('dotenv').config()
 const express = require('express')
 const jwt = require('express-jwt')
 const graphqlHTTP = require('express-graphql')
+const config = require('./config')
 const schema = require('./schema')
 
 const app = express()
+const port = process.env.PORT || 4000
+const { audience, issuer, secret } = config.jwt
 
 app.use(jwt({
-  secret: process.env.JWT_SECRET,
-  audience: process.env.JWT_AUDIENCE,
-  issuer: process.env.JWT_ISSUER,
+  audience,
+  issuer,
+  secret,
   credentialsRequired: false, // allow empty tokens (but not invalid tokens)
 }))
 app.use((err, req, res, next) => {
@@ -25,5 +27,5 @@ app.use(
   })
 )
 
-app.listen(process.env.LISTEN_PORT)
-console.log(`App listening on localhost:${process.env.LISTEN_PORT}`)
+app.listen(port)
+console.log(`App listening on localhost:${port}`)
