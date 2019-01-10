@@ -8,8 +8,8 @@ const app = express()
 
 app.use(jwt({
   secret: process.env.JWT_SECRET,
-  audience: 'graphql-test-api',
-  issuer: 'graphql-test-server',
+  audience: process.env.JWT_AUDIENCE,
+  issuer: process.env.JWT_ISSUER,
   credentialsRequired: false, // allow empty tokens (but not invalid tokens)
 }))
 app.use((err, req, res, next) => {
@@ -25,5 +25,5 @@ app.use(
   })
 )
 
-app.listen(process.env.PORT)
-console.log(`App listening on localhost:${process.env.PORT}`)
+app.listen(process.env.LISTEN_PORT)
+console.log(`App listening on localhost:${process.env.LISTEN_PORT}`)

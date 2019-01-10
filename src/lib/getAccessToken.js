@@ -1,14 +1,17 @@
 import jwt from 'jwt-simple'
 
-const SECRET = 'some-strong-secret-key'
+// these should match values in api/.env
+const JWT_AUDIENCE = 'graphql-test-api'
+const JWT_ISSUER = 'graphql-test-server'
+const JWT_SECRET = 'some-strong-secret-key'
 
 const getAccessToken = (userId, scope) => jwt.encode({
-  iss: 'graphql-test-server',
+  aud: JWT_AUDIENCE,
+  iss: JWT_ISSUER,
   iat: 1509041117,
   exp: 2540577117,
-  aud: 'graphql-test-api',
   sub: userId,
   scope: scope,
-}, SECRET)
+}, JWT_SECRET)
 
 export default getAccessToken
