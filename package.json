@@ -19,6 +19,10 @@
     "now-build": "yarn build && mv build dist",
     "deploy": "now && now alias"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dan-kwiat/graphql-auth.git"
+  },
   "eslintConfig": {
     "extends": "react-app"
   },

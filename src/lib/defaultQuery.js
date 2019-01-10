@@ -1,5 +1,6 @@
-const defaultQuery = `# Welcome to GraphiQL
-# See https://github.com/dan-kwiat/graphql-auth for source code.
+const defaultQuery = `# See https://github.com/dan-kwiat/graphql-auth for source code.
+#
+# Welcome to GraphiQL
 #
 # GraphiQL is an in-browser tool for writing, validating, and
 # testing GraphQL queries.
