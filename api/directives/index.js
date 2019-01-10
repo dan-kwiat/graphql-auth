@@ -1,88 +1,25 @@
-const { forEachField } = require('graphql-tools');
-const { getArgumentValues } = require('graphql/execution/values');
-const { AuthorizationError } = require('./../errors');
-const jwt = require('jsonwebtoken');
-const { defaultFieldResolver } = require('graphql');
+const { AuthorizationError } = require('./../errors')
 
 const directiveResolvers = {
-  isAuthenticated(result, source, args, context) {
-    const token = context.headers.authorization;
-    if (!token) {
+  isAuthenticated(next, source, args, context) {
+    if (!context.user) {
       throw new AuthorizationError({
         message: 'You must supply a JWT for authorization!'
-      });
+      })
     }
-    try {
-      const decoded = jwt.verify(
-        token.replace('Bearer ', ''),
-        process.env.JWT_SECRET
-      );
-      return result;
-    } catch (err) {
-      throw new AuthorizationError({
-        message: 'You are not authorized.'
-      });
-    }
+    return next()
   },
-  hasScope(result, source, args, context) {
-    const token = context.headers.authorization;
-    const expectedScopes = args.scope;
-    if (!token) {
+  hasScope(next, source, args, context) {
+    const expectedScopes = args.scopes
+    const scopes = context.user && context.user.scope && context.user.scope.split(' ')
+    const hasAllScopes = scopes && expectedScopes.every(x => scopes.indexOf(x) !== -1)
+    if (!hasAllScopes) {
       throw new AuthorizationError({
-        message: 'You must supply a JWT for authorization!'
-      });
+        message: `You are not authorized. Expected scopes: ${expectedScopes.join(', ')}`
+      })
     }
-    try {
-      const decoded = jwt.verify(
-        token.replace('Bearer ', ''),
-        process.env.JWT_SECRET
-      );
-      const scopes = decoded.scope.split(' ');
-      if (expectedScopes.some(scope => scopes.indexOf(scope) !== -1)) {
-        return result;
-      }
-      throw new Error();
-    } catch (err) {
-      return Promise.reject(
-        new AuthorizationError({
-          message: `You are not authorized. Expected scopes: ${expectedScopes.join(
-            ', '
-          )}`
-        })
-      );
-    }
+    return next()
   }
-};
+}
 
-// Credit: agonbina https://github.com/apollographql/graphql-tools/issues/212
-const attachDirectives = schema => {
-  forEachField(schema, field => {
-    const directives = field.astNode.directives;
-    directives.forEach(directive => {
-      const directiveName = directive.name.value;
-      const resolver = directiveResolvers[directiveName];
-
-      if (resolver) {
-        const oldResolve = field.resolve || defaultFieldResolver;
-        const Directive = schema.getDirective(directiveName);
-        const args = getArgumentValues(Directive, directive);
-
-        field.resolve = function() {
-          const [source, _, context, info] = arguments;
-          let promise = oldResolve.call(field, ...arguments);
-
-          const isPrimitive = !(promise instanceof Promise);
-          if (isPrimitive) {
-            promise = Promise.resolve(promise);
-          }
-
-          return promise.then(result =>
-            resolver(result, source, args, context, info)
-          );
-        };
-      }
-    });
-  });
-};
-
-module.exports = { directiveResolvers, attachDirectives };
+module.exports = { directiveResolvers }

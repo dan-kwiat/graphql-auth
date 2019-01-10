@@ -1,75 +1,29 @@
-require('dotenv').config();
-const express = require('express');
-const graphqlHTTP = require('express-graphql');
-const { makeExecutableSchema } = require('graphql-tools');
-const { directiveResolvers, attachDirectives } = require('./directives');
-const { attachUserToContext } = require('./middleware');
-const { getArticlesForAuthor, addArticle } = require('./controllers');
-const { checkAuthAndResolve, checkScopesAndResolve } = require('./resolvers');
-
-const port = 4000
+require('dotenv').config()
+const express = require('express')
+const jwt = require('express-jwt')
+const graphqlHTTP = require('express-graphql')
+const schema = require('./schema')
 
 const app = express()
 
-const typeDefs = `
-  directive @isAuthenticated on QUERY | FIELD
-  directive @hasScope(scope: [String]) on QUERY | FIELD
-
-  type Article {
-    id: ID!
-    authorId: ID!
-    authorName: String!
-    articleName: String!
-    link: String!
-    review: Review @hasScope(scope: ["read:review"])
+app.use(jwt({
+  secret: process.env.JWT_SECRET,
+  audience: 'graphql-test-api',
+  issuer: 'graphql-test-server',
+  credentialsRequired: false, // allow empty tokens (but not invalid tokens)
+}))
+app.use((err, req, res, next) => {
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).send({ message: err.message }) // this is a case where 401 status is returned (not standard graphql 200)
   }
-  
-  type Review {
-    rating: Int
-    comment: String
-  }
-
-  input ArticleInput {
-    authorId: ID!
-    authorName: String!
-    articleName: String!
-    link: String!
-  }
-
-  type Query {
-    allArticles: [Article]
-  }
-
-  type Mutation {
-    addArticle(input: ArticleInput): Article
-  }
-`;
-
-const resolvers = {
-  Query: {
-    allArticles: (_, args, context) =>
-      checkAuthAndResolve(context, getArticlesForAuthor)
-  },
-  Mutation: {
-    addArticle: (_, { input }, context) => {
-      checkScopesAndResolve(context, ['write:articles'], addArticle, input);
-    }
-  }
-};
-
-const schema = makeExecutableSchema({ typeDefs, resolvers });
-
-attachDirectives(schema);
-
-// app.use(attachUserToContext);
-
+})
 app.use(
   '/graphql',
   graphqlHTTP({
     schema,
-    graphiql: true
+    graphiql: false,
   })
-);
+)
 
-app.listen(port);
-console.log(`App listening on localhost:${port}`);
+app.listen(process.env.PORT)
+console.log(`App listening on localhost:${process.env.PORT}`)
